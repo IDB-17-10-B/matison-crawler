@@ -1,5 +1,5 @@
 site='http://stankin.ru/university'
-word='обработки'
+word='yeet'
 import sys
 import re
 import requests
