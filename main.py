@@ -18,7 +18,7 @@ symbol_pattern=re.compile(r'[,.:+;!&%|\()/©@"?/]+')
 
 search_word = morph.parse(word)[0]  
 search_word = search_word.normal_form
-file = open('forcrowler.txt', 'w')
+file = open('crawler.txt', 'w')
 file.close()
 
 
