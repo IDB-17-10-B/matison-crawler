@@ -1,18 +1,26 @@
+#yoink my code now
 site='http://stankin.ru/university'
 word='yeet'
 import sys
 import re
 import requests
 import time
+import pymorphy2
+morph = pymorphy2.MorphAnalyzer()
+
 pattern=re.compile(r'href="(?P<url>[a-zA-Z0-9:/&?=/.-]+)"')
 body_pattern=re.compile(r'<body>([\s\S]+)</body>')
 style_pattern=re.compile(r'<style[^>]*>[\s\S]*?</style>')
 script_pattern=re.compile(r'<script[^>]*>[\s\S]*?</script>')
-
-
 hook_pattern=re.compile(r'<.*?>')
 space_pattern=re.compile(r'[\t\n\r\s]+')
 symbol_pattern=re.compile(r'[,.:+;!&%|\()/©@"?/]+')
+
+search_word = morph.parse(word)[0]  
+search_word = search_word.normal_form
+file = open('forcrowler.txt', 'w')
+file.close()
+
 
 def foo(search_word, addr, index):
   html=requests.get(addr).text
@@ -25,13 +33,16 @@ def foo(search_word, addr, index):
   text=re.sub(r'&nbsp;','',text)
   text=re.sub(r'&quot;','',text)
   text=space_pattern.sub(' ',text)
-  
-  #f = open(, "a")
-  print (text)  
-  print ('---------------')
-  foo2(search_word,text)
+       
+  rep = search_foo(search_word,text)
+  file = open('crawler.txt', 'a')
+  file.write(str(rep)+' '+addr+'\n')
+  file.close()
+
+  print ('На',addr,'\nСлово "'+word+'" повторяется',rep,'раз\n') 
+
+
   new_links=[]
-  
   for item in links:
     if item.endswith(('.png','.css')):
       continue
@@ -45,7 +56,6 @@ def foo(search_word, addr, index):
       return new_links
   all_links =[]
   for item in new_links:
-    print(item)
     time.sleep(2)
     current_links = foo(search_word,item,index-1)
     all_links.extend(current_links)
@@ -53,22 +63,34 @@ def foo(search_word, addr, index):
 
   return new_links
 
-def foo2(search_word,text):
-  #извращения с ненужными символами
-  text=symbol_pattern.sub('',text).lower()#AbC->abc
+
+def search_foo(search_word,text):
+  text=symbol_pattern.sub('',text)
   text=space_pattern.sub(' ',text)
   words=re.split(' ',text)
 
-  print (words)
-  print ('---------!!!-------')
+  morph_words = []
+  for item in words:
+    p = morph.parse(item)[0]  #разбор слова
+    morph_words.append(p.normal_form) 
 
   rep=0
-  for item in words:
+  for item in morph_words:
     if item==search_word:
       rep+=1
-  print ('Слово "',word,'" повторяется ',rep, ' раз') 
+
   return rep
 
 
-for item in foo(word,site,2):
-  print (item)
+foo(search_word,site,2)
+list_sort={}
+l=[]
+file = open('crawler.txt', 'r')
+for line in file:
+  l=re.split(' ',line,1)
+  list_sort[l[1]]=int(l[0])   
+file.close()
+
+for item in sorted(list_sort, key=list_sort.get, reverse=True):
+  print (list_sort[item],item)
+  
